@@ -1,0 +1,57 @@
+/*
+** list.h for shifumi in /home/julien/devc/correction_shifumi
+** 
+** Made by BETTALE Julien
+** Login   <bettal_j@etna-alternance.net>
+** 
+** Started on  Tue Apr  3 21:16:13 2018 BETTALE Julien
+** Last update Tue Apr  3 21:49:20 2018 BETTALE Julien
+*/
+
+#include <stdlib.h>
+#include "game.h"
+#include "my.h"
+
+t_play_list *add_to_list(t_play_list *list, char *str)
+{
+  // list pointeur sur dernier element de la list
+  // str est une chaine alloué, la liste a la responsabilité de le liberé
+
+  t_play_list *elem;
+
+  elem = malloc(sizeof(t_play_list));
+  elem->data = str;
+  elem->next = NULL;
+  if (list != NULL)
+    list->next = elem;
+  else
+    list = elem;
+  return (elem);
+}
+
+void	print_list(t_play_list *list)
+{
+  // list premiere element de la list
+
+  while (list != NULL)
+    {
+      my_putstr(list->data);
+      my_putchar('\n');
+      list = list->next;
+    }
+}
+
+void	delete_list(t_play_list *list)
+{
+  // list premiere element de la liste
+
+  t_play_list *tmp;
+
+  while (list != NULL)
+    {
+      free(list->data);
+      tmp = list;
+      list = list->next;
+      free(tmp);
+    }
+}

@@ -1,0 +1,129 @@
+/*
+** game.c for shifumi in /home/julien/devc/correction_shifumi
+** 
+** Made by BETTALE Julien
+** Login   <bettal_j@etna-alternance.net>
+** 
+** Started on  Tue Apr  3 20:46:43 2018 BETTALE Julien
+** Last update Tue Apr  3 22:43:12 2018 BETTALE Julien
+*/
+
+#include <stdlib.h>
+#include "my.h"
+#include "game.h"
+#include "list.h"
+#include "bool.h"
+
+static void print_config(t_game *game)
+{
+  my_putstr("Votre partie est prête\n\tversion: ");
+  my_putstr(game->version == 0 ? "classique\n" : "expert\n");
+  my_putstr("\tbest of: ");
+  my_put_nbr(game->duree);
+  my_putchar('\n');
+}
+
+static int valid_input(char *input, int version)
+{
+  if (my_strcmp(input, "pierre") == 0 ||
+      my_strcmp(input, "feuille") == 0 ||
+      my_strcmp(input, "ciseaux") == 0)
+    return (TRUE);
+  if (version == 1 && (my_strcmp(input, "lezard") == 0 ||
+		       my_strcmp(input, "spock") == 0))
+    return (TRUE);
+  return (FALSE);
+}
+
+#define PIERRE	0
+#define FEUILLE	1
+#define CISEAUX	2
+#define LEZARD	3
+#define	SPOCK	4
+
+static int		get_score(int play, int play_opponent, int version)
+{
+  static const int	tab_classique[3][3] = {
+    {0, 0, 1},
+    {1, 0, 0},
+    {0, 1, 0}
+  };
+  static const int	tab_expert[5][5] = {
+    {0, 0, 1, 0, 1},
+    {1, 0, 0, 1, 0},
+    {0, 1, 0, 0, 1},
+    {1, 0, 1, 0, 0},
+    {0, 1, 0, 1, 0}
+  };
+
+  if (version == 0) // classique
+    return tab_classique[play][play_opponent];
+  else // expert
+    return tab_expert[play][play_opponent];
+}
+
+static void	do_play(char *input, t_game *game)
+{
+  int		player_play;
+  int		AI_play;
+
+  if (my_strcmp(input, "pierre") == 0)
+    player_play = PIERRE;
+  else if (my_strcmp(input, "feuille") == 0)
+    player_play = FEUILLE;
+  else if (my_strcmp(input, "ciseaux") == 0)
+    player_play = CISEAUX;
+  else if (my_strcmp(input, "lezard") == 0)
+    player_play = LEZARD;
+  else
+    player_play = SPOCK;
+  AI_play = rand() % (game->version == 0 ? 3 : 5);
+  my_putstr("tour de l'IA : ");
+  my_put_nbr(AI_play);
+  my_putchar('\n');
+  game->player_score += get_score(player_play, AI_play, game->version);
+  game->AI_score += get_score(AI_play, player_play, game->version);
+  my_putstr("player_score : ");
+  my_put_nbr(game->player_score);
+  my_putstr("\nAI_score  : ");
+  my_put_nbr(game->AI_score);
+  my_putchar('\n');
+}
+
+int		run(t_game *game)
+{
+  char		*input;
+  t_play_list	*list; // permier element
+  t_play_list	*last; // dernier element
+
+  print_config(game);
+  last = NULL;
+  list = NULL;
+  game->player_score = 0;
+  game->AI_score = 0;
+  // game duree nb max manche, score max ou l'adversaire peut pas te rattraper duree / 2 + 1, dans le cas de 7 -> 4 :  7 / 2 = 3 + 1 = 4
+  // donc tant que les scores sont inferieur ou egale a  duree / 2 donc inferieur au score max
+  while (game->player_score <= (game->duree / 2) && game->AI_score <= (game->duree / 2) &&
+	 (input = readline()) != NULL && my_strcmp(input, "quit") != 0)
+    {
+      if (valid_input(input, game->version) == TRUE)
+	{
+	  do_play(input, game);
+	  last = add_to_list(last, input);
+	  if (list == NULL)
+	    list = last;
+	}
+      else
+	{
+	  free(input);
+	  my_putstr("Invalid Input.\n");
+	}
+    }
+  if (input != NULL && my_strcmp(input, "quit") != 0)
+    my_putstr(game->player_score >= game->AI_score ? "Player win !\n" : "AI win !\n");
+  if (input != NULL)
+    free(input);
+  print_list(list);
+  delete_list(list);
+  return (0);
+}

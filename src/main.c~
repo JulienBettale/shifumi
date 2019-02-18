@@ -1,0 +1,23 @@
+/*
+** main.c for main in /home/julien/devc/correction_shifumi
+** 
+** Made by BETTALE Julien
+** Login   <bettal_j@etna-alternance.net>
+** 
+** Started on  Tue Apr  3 19:31:50 2018 BETTALE Julien
+** Last update Tue Apr  3 20:12:42 2018 BETTALE Julien
+*/
+
+#include "game.h"
+#include "arg.h"
+
+int		main(int ac, char *av[])
+{
+  t_game	game;
+  
+  if (check_arg(ac - 1, av + 1, &game) != 0)
+    return (1);
+  run(&game);
+  
+  return (0);
+}
